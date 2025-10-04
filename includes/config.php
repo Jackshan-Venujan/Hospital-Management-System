@@ -19,10 +19,12 @@ define('SITE_NAME', 'Hospital Management System');
 define('ADMIN_EMAIL', 'admin@hospital.com');
 
 // Session Configuration
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 0); // Set to 1 if using HTTPS
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 0); // Set to 1 if using HTTPS
+    session_start();
+}
 
 // Database Connection Class
 class Database {
@@ -126,6 +128,17 @@ class Database {
 
 // Create global database instance
 $db = new Database();
+
+// MySQLi Connection for backward compatibility
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+// Check MySQLi connection
+if ($conn->connect_error) {
+    die("MySQLi Connection failed: " . $conn->connect_error);
+}
+
+// Set charset for MySQLi
+$conn->set_charset("utf8mb4");
 
 // Helper Functions
 function sanitize_input($data) {

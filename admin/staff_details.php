@@ -256,7 +256,7 @@ if (!empty($staff['hire_date'])) {
                             <p class="text-dark">
                                 <i class="fas fa-dollar-sign text-success me-2"></i>
                                 <strong class="text-success">
-                                    <?php echo '$' . number_format($staff['salary'], 2); ?>
+                                    <?php echo 'Rs. ' . number_format($staff['salary'], 2); ?>
                                 </strong>
                                 <small class="text-muted">per year</small>
                             </p>

@@ -316,7 +316,7 @@ include '../includes/header.php';
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1">
                                         <h6 class="card-title">Total Revenue (30 days)</h6>
-                                        <h4 class="mb-0">$<?php echo number_format($stats['total_revenue'] ?? 0, 2); ?></h4>
+                                        <h4 class="mb-0">Rs. <?php echo number_format($stats['total_revenue'] ?? 0, 2); ?></h4>
                                     </div>
                                     <div class="ms-3">
                                         <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
@@ -331,7 +331,7 @@ include '../includes/header.php';
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1">
                                         <h6 class="card-title">Total Paid</h6>
-                                        <h4 class="mb-0">$<?php echo number_format($stats['total_paid'] ?? 0, 2); ?></h4>
+                                        <h4 class="mb-0">Rs. <?php echo number_format($stats['total_paid'] ?? 0, 2); ?></h4>
                                     </div>
                                     <div class="ms-3">
                                         <i class="fas fa-check-circle fa-2x opacity-75"></i>
@@ -346,7 +346,7 @@ include '../includes/header.php';
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1">
                                         <h6 class="card-title">Outstanding</h6>
-                                        <h4 class="mb-0">$<?php echo number_format($stats['total_outstanding'] ?? 0, 2); ?></h4>
+                                        <h4 class="mb-0">Rs. <?php echo number_format($stats['total_outstanding'] ?? 0, 2); ?></h4>
                                     </div>
                                     <div class="ms-3">
                                         <i class="fas fa-exclamation-circle fa-2x opacity-75"></i>
@@ -414,6 +414,9 @@ include '../includes/header.php';
                                     <a href="export_invoices.php?<?php echo http_build_query($_GET); ?>" class="btn btn-success">
                                         <i class="fas fa-download me-1"></i>Export
                                     </a>
+                                    <button class="btn btn-info btn-sm" onclick="testAllDropdowns()" title="Debug: Test all dropdowns">
+                                        <i class="fas fa-bug"></i> Test Dropdowns
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -457,9 +460,9 @@ include '../includes/header.php';
                                                         <small class="text-muted d-block">Due: <?php echo date('M d, Y', strtotime($invoice['due_date'])); ?></small>
                                                     <?php endif; ?>
                                                 </td>
-                                                <td>$<?php echo number_format($invoice['total_amount'], 2); ?></td>
-                                                <td>$<?php echo number_format($invoice['paid_amount'], 2); ?></td>
-                                                <td>$<?php echo number_format($invoice['balance_amount'], 2); ?></td>
+                                                <td>Rs. <?php echo number_format($invoice['total_amount'], 2); ?></td>
+                                                <td>Rs. <?php echo number_format($invoice['paid_amount'], 2); ?></td>
+                                                <td>Rs. <?php echo number_format($invoice['balance_amount'], 2); ?></td>
                                                 <td>
                                                     <?php
                                                     $status_class = [
@@ -723,7 +726,7 @@ include '../includes/header.php';
                         <label for="payment_amount" class="form-label">Payment Amount *</label>
                         <input type="number" class="form-control" id="payment_amount" name="payment_amount" 
                                step="0.01" min="0" required>
-                        <small class="form-text text-muted">Outstanding Balance: $<span id="outstanding_balance">0.00</span></small>
+                        <small class="form-text text-muted">Outstanding Balance: Rs. <span id="outstanding_balance">0.00</span></small>
                     </div>
                     
                     <div class="mb-3">
@@ -794,7 +797,7 @@ include '../includes/header.php';
                                     <td>
                                         <span class="badge bg-primary"><?php echo ucfirst($service['service_type']); ?></span>
                                     </td>
-                                    <td>$<?php echo number_format($service['default_price'], 2); ?></td>
+                                    <td>Rs. <?php echo number_format($service['default_price'], 2); ?></td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-success" 
                                                 onclick="addServiceToInvoice('<?php echo htmlspecialchars($service['service_name']); ?>', '<?php echo $service['service_type']; ?>', <?php echo $service['default_price']; ?>)">
@@ -908,6 +911,53 @@ include '../includes/header.php';
 .table td {
     position: relative;
     overflow: visible;
+    z-index: 1;
+}
+
+/* Ensure table container doesn't clip dropdowns */
+.table-responsive {
+    overflow: visible !important;
+}
+
+/* Fix for dropdown in table cells - use proper Bootstrap positioning */
+.table td .dropdown {
+    position: relative;
+}
+
+.table td .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    z-index: 1050 !important;
+    transform: none !important;
+}
+
+/* Ensure dropdown menu positioning works properly */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    z-index: 1050 !important;
+    display: none;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-menu.show {
+    display: block !important;
 }
 
 /* Visual feedback for dropdown button */
@@ -926,12 +976,34 @@ include '../includes/header.php';
 .dropdown-item {
     padding: 0.5rem 1rem;
     transition: background-color 0.15s ease-in-out;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    color: #212529;
+    text-decoration: none;
 }
 
 .dropdown-item:hover, 
 .dropdown-item:focus {
-    background-color: #e9ecef;
-    color: #495057;
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+}
+
+/* Ensure dropdown toggle has proper styling */
+.dropdown-toggle {
+    position: relative;
+}
+
+.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
 }
 </style>
 
@@ -1115,6 +1187,51 @@ function printInvoice(invoiceId) {
     window.open(`invoice_view.php?id=${invoiceId}&print=1`, '_blank');
 }
 
+// Debug function to test all dropdowns
+function testAllDropdowns() {
+    console.log('🧪 Testing all dropdowns manually...');
+    
+    const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    console.log(`Found ${dropdowns.length} dropdown elements`);
+    
+    if (dropdowns.length === 0) {
+        alert('No dropdowns found! Make sure invoices are loaded on the page.');
+        return;
+    }
+    
+    let results = [];
+    
+    dropdowns.forEach((dropdown, index) => {
+        try {
+            console.log(`Testing dropdown ${index + 1}...`);
+            
+            // Check if element is visible
+            const rect = dropdown.getBoundingClientRect();
+            const isVisible = rect.width > 0 && rect.height > 0;
+            
+            // Try to create Bootstrap dropdown instance
+            const bsDropdown = new bootstrap.Dropdown(dropdown);
+            
+            // Test show/hide
+            bsDropdown.show();
+            const menu = dropdown.nextElementSibling;
+            const menuVisible = menu && menu.classList.contains('show');
+            
+            setTimeout(() => bsDropdown.hide(), 500);
+            
+            results.push(`Dropdown ${index + 1}: ${isVisible ? '✅ Visible' : '❌ Hidden'}, ${menuVisible ? '✅ Works' : '❌ Broken'}`);
+            
+        } catch (error) {
+            console.error(`Error testing dropdown ${index + 1}:`, error);
+            results.push(`Dropdown ${index + 1}: ❌ Error - ${error.message}`);
+        }
+    });
+    
+    setTimeout(() => {
+        alert('Dropdown Test Results:\n\n' + results.join('\n'));
+    }, 1000);
+}
+
 // Service catalog search and filter
 document.getElementById('service_search').addEventListener('input', filterServiceCatalog);
 document.getElementById('service_type_filter').addEventListener('change', filterServiceCatalog);
@@ -1146,59 +1263,134 @@ document.getElementById('invoiceModal').addEventListener('hidden.bs.modal', func
 
 // Initialize Bootstrap dropdowns and debug issues
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Billing page JavaScript loaded successfully');
+    console.log('🚀 Billing page JavaScript loaded successfully');
     
     // Check if Bootstrap is loaded
     if (typeof bootstrap === 'undefined') {
-        console.error('Bootstrap is not loaded!');
+        console.error('❌ Bootstrap is not loaded!');
         alert('Bootstrap JavaScript is not loaded. Dropdown actions will not work.');
         return;
     }
     
-    console.log('Bootstrap is loaded:', bootstrap.Tooltip.VERSION);
+    console.log('✅ Bootstrap is loaded:', bootstrap.Tooltip.VERSION);
     
-    // Initialize all dropdowns manually to ensure they work
-    var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
-    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-        return new bootstrap.Dropdown(dropdownToggleEl);
-    });
-    
-    console.log('Initialized ' + dropdownList.length + ' dropdowns');
-    
-    // Add debugging event listeners
-    dropdownElementList.forEach(function(dropdown, index) {
-        dropdown.addEventListener('click', function(e) {
-            console.log('Dropdown ' + index + ' clicked');
-            // Ensure the click isn't blocked
-            e.stopPropagation();
-        });
-        
-        dropdown.addEventListener('show.bs.dropdown', function() {
-            console.log('Dropdown ' + index + ' is showing');
-        });
-        
-        dropdown.addEventListener('shown.bs.dropdown', function() {
-            console.log('Dropdown ' + index + ' shown successfully');
-        });
-        
-        dropdown.addEventListener('hide.bs.dropdown', function() {
-            console.log('Dropdown ' + index + ' is hiding');
-        });
-    });
-    
-    // Test a specific dropdown after 2 seconds
+    // Wait a bit for the page to fully render
     setTimeout(function() {
-        if (dropdownList.length > 0) {
-            console.log('Testing first dropdown programmatically...');
-            try {
-                dropdownList[0].show();
-                setTimeout(() => dropdownList[0].hide(), 1000);
-                console.log('Dropdown test successful');
-            } catch (error) {
-                console.error('Dropdown test failed:', error);
-            }
+        // Initialize all dropdowns manually to ensure they work
+        var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+        
+        console.log('🔍 Found ' + dropdownElementList.length + ' dropdown elements');
+        
+        if (dropdownElementList.length === 0) {
+            console.warn('⚠️ No dropdown elements found! Check if invoices are loaded.');
+            return;
         }
-    }, 2000);
+        
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl, index) {
+            try {
+                console.log('🔧 Initializing dropdown ' + (index + 1));
+                
+                // Configure dropdown with proper options
+                const dropdownConfig = {
+                    boundary: 'viewport',
+                    display: 'dynamic',
+                    popperConfig: {
+                        placement: 'bottom-end',
+                        modifiers: [
+                            {
+                                name: 'preventOverflow',
+                                options: {
+                                    boundary: 'viewport',
+                                }
+                            },
+                            {
+                                name: 'flip',
+                                options: {
+                                    fallbackPlacements: ['bottom-start', 'top-end', 'top-start']
+                                }
+                            }
+                        ]
+                    }
+                };
+                
+                return new bootstrap.Dropdown(dropdownToggleEl, dropdownConfig);
+            } catch (error) {
+                console.error('❌ Error initializing dropdown ' + (index + 1) + ':', error);
+                // Try basic initialization as fallback
+                try {
+                    return new bootstrap.Dropdown(dropdownToggleEl);
+                } catch (fallbackError) {
+                    console.error('❌ Fallback initialization also failed:', fallbackError);
+                    return null;
+                }
+            }
+        }).filter(d => d !== null);
+        
+        console.log('✅ Successfully initialized ' + dropdownList.length + ' dropdowns');
+        
+        // Add comprehensive debugging event listeners
+        dropdownElementList.forEach(function(dropdown, index) {
+            console.log('📝 Adding event listeners to dropdown ' + (index + 1));
+            
+            // Click event
+            dropdown.addEventListener('click', function(e) {
+                console.log('👆 Dropdown ' + (index + 1) + ' clicked');
+                console.log('📍 Target:', e.target);
+                console.log('🎯 Current target:', e.currentTarget);
+            });
+            
+            // Bootstrap dropdown events
+            dropdown.addEventListener('show.bs.dropdown', function(e) {
+                console.log('📂 Dropdown ' + (index + 1) + ' is showing');
+            });
+            
+            dropdown.addEventListener('shown.bs.dropdown', function(e) {
+                console.log('✅ Dropdown ' + (index + 1) + ' shown successfully');
+                // Check if menu is actually visible
+                const menu = dropdown.nextElementSibling;
+                if (menu && menu.classList.contains('dropdown-menu')) {
+                    console.log('👀 Menu visibility:', window.getComputedStyle(menu).display);
+                }
+            });
+            
+            dropdown.addEventListener('hide.bs.dropdown', function(e) {
+                console.log('📁 Dropdown ' + (index + 1) + ' is hiding');
+            });
+            
+            dropdown.addEventListener('hidden.bs.dropdown', function(e) {
+                console.log('❌ Dropdown ' + (index + 1) + ' hidden');
+            });
+            
+            // Error handling
+            dropdown.addEventListener('error', function(e) {
+                console.error('💥 Error with dropdown ' + (index + 1) + ':', e);
+            });
+        });
+        
+        // Test functionality
+        console.log('🧪 Running dropdown tests...');
+        
+        // Add a visual indicator when page is ready
+        const testIndicator = document.createElement('div');
+        testIndicator.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        `;
+        testIndicator.textContent = `✅ ${dropdownList.length} dropdowns ready`;
+        document.body.appendChild(testIndicator);
+        
+        // Remove indicator after 3 seconds
+        setTimeout(() => testIndicator.remove(), 3000);
+        
+    }, 500); // Wait 500ms for page to fully render
 });
 </script>
 

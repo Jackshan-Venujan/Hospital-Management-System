@@ -196,9 +196,9 @@ function showLoading(element) {
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-LK', {
         style: 'currency',
-        currency: 'USD'
+        currency: 'LKR'
     }).format(amount);
 }
 

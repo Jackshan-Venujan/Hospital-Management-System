@@ -67,7 +67,7 @@ if ($format === 'csv') {
             $staff['phone'] ?: 'Not specified',
             ucfirst($staff['role']),
             $staff['department_name'] ?: 'Not assigned',
-            $staff['salary'] ? '$' . number_format($staff['salary'], 2) : 'Not specified',
+            $staff['salary'] ? 'Rs. ' . number_format($staff['salary'], 2) : 'Not specified',
             $staff['hire_date'] ? date('Y-m-d', strtotime($staff['hire_date'])) : 'Not specified',
             $staff['address'] ?: 'Not specified',
             $staff['created_at'] ? date('Y-m-d H:i:s', strtotime($staff['created_at'])) : 'N/A'
@@ -148,8 +148,8 @@ if ($format === 'csv') {
                 </div>
             </div>
             <div style="margin-top: 15px;">
-                <p><strong>Total Payroll:</strong> $' . number_format($total_salary, 2) . '</p>
-                <p><strong>Average Salary:</strong> $' . number_format($avg_salary, 2) . '</p>
+                <p><strong>Total Payroll:</strong> Rs. ' . number_format($total_salary, 2) . '</p>
+                <p><strong>Average Salary:</strong> Rs. ' . number_format($avg_salary, 2) . '</p>
             </div>
         </div>
         
@@ -170,7 +170,7 @@ if ($format === 'csv') {
     
     foreach ($staff_members as $staff) {
         $role_class = 'role-' . $staff['role'];
-        $salary_display = $staff['salary'] ? '$' . number_format($staff['salary'], 2) : 'N/A';
+        $salary_display = $staff['salary'] ? 'Rs. ' . number_format($staff['salary'], 2) : 'N/A';
         $hire_date_display = $staff['hire_date'] ? date('M d, Y', strtotime($staff['hire_date'])) : 'N/A';
         
         $html .= '<tr>

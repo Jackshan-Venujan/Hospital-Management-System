@@ -14,7 +14,7 @@ define('DB_PASS', ''); // Default password for XAMPP/WAMP is usually empty
 define('DB_NAME', 'hospital_management');
 
 // Application Configuration
-define('SITE_URL', 'http://localhost/hospital_management_system/');
+define('SITE_URL', 'http://localhost/Hospital_Management_System/');
 define('SITE_NAME', 'Hospital Management System');
 define('ADMIN_EMAIL', 'admin@hospital.com');
 
@@ -149,7 +149,17 @@ function sanitize_input($data) {
 }
 
 function redirect($location) {
-    header("Location: " . SITE_URL . $location);
+    // Handle both absolute and relative URLs
+    if (strpos($location, 'http') === 0) {
+        header("Location: " . $location);
+    } else {
+        // For relative paths, check if it starts with a slash
+        if (strpos($location, '/') === 0) {
+            header("Location: " . $location);
+        } else {
+            header("Location: " . SITE_URL . $location);
+        }
+    }
     exit();
 }
 

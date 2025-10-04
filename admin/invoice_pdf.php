@@ -308,8 +308,8 @@ foreach ($items as $item) {
                     <td><span class="badge">' . htmlspecialchars($item['item_type']) . '</span></td>
                     <td>' . htmlspecialchars($item['description']) . '</td>
                     <td class="text-center">' . number_format($item['quantity'], 2) . '</td>
-                    <td class="text-right">$' . number_format($item['unit_price'], 2) . '</td>
-                    <td class="text-right">$' . number_format($item['total_price'], 2) . '</td>
+                    <td class="text-right">Rs. ' . number_format($item['unit_price'], 2) . '</td>
+                    <td class="text-right">Rs. ' . number_format($item['total_price'], 2) . '</td>
                 </tr>';
 }
 
@@ -322,19 +322,19 @@ $html_content .= '
         <table class="totals-table">
             <tr>
                 <td>Subtotal:</td>
-                <td class="text-right">$' . number_format($invoice['subtotal'], 2) . '</td>
+                <td class="text-right">Rs. ' . number_format($invoice['subtotal'], 2) . '</td>
             </tr>
             ' . ($invoice['discount_amount'] > 0 ? '<tr>
                 <td>Discount:</td>
-                <td class="text-right">-$' . number_format($invoice['discount_amount'], 2) . '</td>
+                <td class="text-right">-Rs. ' . number_format($invoice['discount_amount'], 2) . '</td>
             </tr>' : '') . '
             <tr>
                 <td>Tax (' . $invoice['tax_rate'] . '%):</td>
-                <td class="text-right">$' . number_format($invoice['tax_amount'], 2) . '</td>
+                <td class="text-right">Rs. ' . number_format($invoice['tax_amount'], 2) . '</td>
             </tr>
             <tr class="total-row">
                 <td>Total Amount:</td>
-                <td class="text-right">$' . number_format($invoice['total_amount'], 2) . '</td>
+                <td class="text-right">Rs. ' . number_format($invoice['total_amount'], 2) . '</td>
             </tr>
         </table>
     </div>';
@@ -345,9 +345,9 @@ if (!empty($payments)) {
         <h3 style="color: #007bff; margin-bottom: 15px;">Payment History</h3>
         <div class="payment-summary">
             <strong>Payment Summary:</strong><br>
-            Total Amount: $' . number_format($invoice['total_amount'], 2) . ' | 
-            Paid Amount: $' . number_format($invoice['paid_amount'], 2) . ' | 
-            Balance Due: $' . number_format($invoice['balance_amount'], 2) . '
+            Total Amount: Rs. ' . number_format($invoice['total_amount'], 2) . ' | 
+            Paid Amount: Rs. ' . number_format($invoice['paid_amount'], 2) . ' | 
+            Balance Due: Rs. ' . number_format($invoice['balance_amount'], 2) . '
         </div>
         
         <table class="items-table">
@@ -368,7 +368,7 @@ if (!empty($payments)) {
                     <td>' . htmlspecialchars($payment['payment_number']) . '</td>
                     <td>' . date('M j, Y', strtotime($payment['payment_date'])) . '</td>
                     <td>' . ucfirst(str_replace('_', ' ', $payment['payment_method'])) . '</td>
-                    <td class="text-right">$' . number_format($payment['amount'], 2) . '</td>
+                    <td class="text-right">Rs. ' . number_format($payment['amount'], 2) . '</td>
                     <td>' . htmlspecialchars($payment['reference_number'] ?? '-') . '</td>
                 </tr>';
     }

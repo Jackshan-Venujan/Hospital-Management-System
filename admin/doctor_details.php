@@ -172,7 +172,7 @@ try {
                             </tr>
                             <tr>
                                 <td><strong>Consultation Fee:</strong></td>
-                                <td><strong class="text-success">$<?php echo number_format($doctor['consultation_fee'], 2); ?></strong></td>
+                                <td><strong class="text-success">Rs. <?php echo number_format($doctor['consultation_fee'], 2); ?></strong></td>
                             </tr>
                         </table>
                     </div>

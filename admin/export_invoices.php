@@ -212,15 +212,15 @@ try {
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Total Revenue</div>
-                        <div class="summary-value">$' . number_format($total_revenue, 2) . '</div>
+                        <div class="summary-value">Rs. ' . number_format($total_revenue, 2) . '</div>
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Total Paid</div>
-                        <div class="summary-value">$' . number_format($total_paid, 2) . '</div>
+                        <div class="summary-value">Rs. ' . number_format($total_paid, 2) . '</div>
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Outstanding</div>
-                        <div class="summary-value">$' . number_format($total_outstanding, 2) . '</div>
+                        <div class="summary-value">Rs. ' . number_format($total_outstanding, 2) . '</div>
                     </div>
                 </div>
                 
@@ -267,9 +267,9 @@ try {
                         <td>' . htmlspecialchars($invoice['patient_first_name'] . ' ' . $invoice['patient_last_name']) . '</td>
                         <td>' . ($invoice['doctor_first_name'] ? 'Dr. ' . htmlspecialchars($invoice['doctor_first_name'] . ' ' . $invoice['doctor_last_name']) : '-') . '</td>
                         <td>' . date('M j, Y', strtotime($invoice['invoice_date'])) . '</td>
-                        <td class="text-right">$' . number_format($invoice['total_amount'], 2) . '</td>
-                        <td class="text-right">$' . number_format($invoice['paid_amount'], 2) . '</td>
-                        <td class="text-right">$' . number_format($invoice['balance_amount'], 2) . '</td>
+                        <td class="text-right">Rs. ' . number_format($invoice['total_amount'], 2) . '</td>
+                        <td class="text-right">Rs. ' . number_format($invoice['paid_amount'], 2) . '</td>
+                        <td class="text-right">Rs. ' . number_format($invoice['balance_amount'], 2) . '</td>
                         <td><span class="status-badge ' . $status_class . '">' . ucfirst($invoice['payment_status']) . '</span></td>
                         <td class="text-right">' . $invoice['item_count'] . '</td>
                     </tr>';

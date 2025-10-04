@@ -119,7 +119,7 @@ try {
                 $doctor['department_name'] ?: 'Not Assigned',
                 $doctor['qualification'],
                 $doctor['experience_years'],
-                number_format($doctor['consultation_fee'], 2),
+                'Rs. ' . number_format($doctor['consultation_fee'], 2),
                 $doctor['schedule_start'],
                 $doctor['schedule_end'],
                 $doctor['available_days'],
@@ -211,7 +211,7 @@ try {
                 <td>' . htmlspecialchars($doctor['specialization']) . '</td>
                 <td>' . htmlspecialchars($doctor['department_name'] ?: 'Not Assigned') . '</td>
                 <td>' . $doctor['experience_years'] . ' years</td>
-                <td>$' . number_format($doctor['consultation_fee'], 2) . '</td>
+                <td>Rs. ' . number_format($doctor['consultation_fee'], 2) . '</td>
                 <td>' . format_time($doctor['schedule_start']) . ' - ' . format_time($doctor['schedule_end']) . '</td>
                 <td class="' . $status_class . '">' . ucfirst(htmlspecialchars($doctor['user_status'])) . '</td>
                 <td>' . htmlspecialchars($doctor['phone']) . '<br>' . htmlspecialchars($doctor['email']) . '</td>

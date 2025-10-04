@@ -465,7 +465,7 @@ include '../includes/header.php';
                                     <strong><?php echo $doctor['experience_years']; ?></strong> years
                                 </td>
                                 <td>
-                                    <strong class="text-success">$<?php echo number_format($doctor['consultation_fee'], 2); ?></strong>
+                                    <strong class="text-success">Rs. <?php echo number_format($doctor['consultation_fee'], 2); ?></strong>
                                 </td>
                                 <td>
                                     <small>

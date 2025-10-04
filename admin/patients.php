@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->endTransaction();
             
             set_message('success', 'Patient added successfully! Patient ID: ' . $patient_id_new);
-            redirect('patients.php');
+            redirect('admin/patients.php');
             
         } catch (Exception $e) {
             $db->cancelTransaction();
@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->endTransaction();
             
             set_message('success', 'Patient updated successfully!');
-            redirect('patients.php');
+            redirect('admin/patients.php');
             
         } catch (Exception $e) {
             $db->cancelTransaction();
@@ -148,12 +148,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Handle status updates via AJAX or GET
-if (isset($_GET['toggle_status']) && isset($_GET['patient_id'])) {
+// Handle toggle patient status
+if (isset($_POST['toggle_patient_status']) && isset($_POST['patient_id'])) {
     try {
+        $patient_id = $_POST['patient_id'];
+        
         // Get current patient info
         $db->query('SELECT user_id FROM patients WHERE id = :id');
-        $db->bind(':id', $_GET['patient_id']);
+        $db->bind(':id', $patient_id);
         $patient = $db->single();
         
         if ($patient) {
@@ -170,14 +172,94 @@ if (isset($_GET['toggle_status']) && isset($_GET['patient_id'])) {
             $db->bind(':id', $patient['user_id']);
             $db->execute();
             
+            // Return JSON response for AJAX
+            if (isset($_POST['ajax'])) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'new_status' => $new_status,
+                    'message' => 'Patient status updated to ' . $new_status
+                ]);
+                exit();
+            }
+            
             set_message('success', 'Patient status updated to ' . $new_status);
         }
     } catch (Exception $e) {
+        if (isset($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error updating patient status: ' . $e->getMessage()
+            ]);
+            exit();
+        }
         set_message('error', 'Error updating patient status: ' . $e->getMessage());
     }
     
-    redirect('patients.php');
+    // Only redirect if not AJAX
+    if (!isset($_POST['ajax'])) {
+        redirect('admin/patients.php');
+    }
 }
+
+// Handle delete patient
+if (isset($_POST['delete_patient']) && isset($_POST['patient_id'])) {
+    try {
+        $db->beginTransaction();
+        
+        $patient_id = $_POST['patient_id'];
+        
+        // Get patient info
+        $db->query('SELECT user_id, patient_id FROM patients WHERE id = :id');
+        $db->bind(':id', $patient_id);
+        $patient = $db->single();
+        
+        if ($patient) {
+            // Check if patient has any appointments, medical records, or prescriptions
+            $db->query('SELECT COUNT(*) as count FROM appointments WHERE patient_id = :patient_id');
+            $db->bind(':patient_id', $patient_id);
+            $appointments = $db->single()['count'];
+            
+            $db->query('SELECT COUNT(*) as count FROM medical_records WHERE patient_id = :patient_id');
+            $db->bind(':patient_id', $patient_id);
+            $medical_records = $db->single()['count'];
+            
+            $db->query('SELECT COUNT(*) as count FROM prescriptions WHERE patient_id = :patient_id');
+            $db->bind(':patient_id', $patient_id);
+            $prescriptions = $db->single()['count'];
+            
+            if ($appointments > 0 || $medical_records > 0 || $prescriptions > 0) {
+                // Don't delete, just deactivate if has related records
+                $db->query('UPDATE users SET status = "inactive" WHERE id = :id');
+                $db->bind(':id', $patient['user_id']);
+                $db->execute();
+                
+                set_message('warning', 'Patient account deactivated (cannot delete due to existing medical records/appointments)');
+            } else {
+                // Safe to delete - no related records
+                $db->query('DELETE FROM patients WHERE id = :id');
+                $db->bind(':id', $patient_id);
+                $db->execute();
+                
+                $db->query('DELETE FROM users WHERE id = :id');
+                $db->bind(':id', $patient['user_id']);
+                $db->execute();
+                
+                set_message('success', 'Patient deleted successfully');
+            }
+        }
+        
+        $db->endTransaction();
+    } catch (Exception $e) {
+        $db->cancelTransaction();
+        set_message('error', 'Error deleting patient: ' . $e->getMessage());
+    }
+    
+    redirect('admin/patients.php');
+}
+
+
 
 // Pagination and search setup
 $search = $_GET['search'] ?? '';
@@ -258,35 +340,41 @@ include '../includes/header.php';
 <!-- Search and Filters -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
-                <label for="search" class="form-label">Search</label>
-                <input type="text" class="form-control" id="search" name="search" 
-                       placeholder="Search by name, ID, email, or phone"
-                       value="<?php echo htmlspecialchars($search); ?>">
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               placeholder="Search by name, ID, email, or phone"
+                               value="<?php echo htmlspecialchars($search); ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">All Status</option>
+                            <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Active</option>
+                            <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-search me-1"></i>Search
+                            </button>
+                            <a href="patients.php" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="col-md-3">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select" id="status" name="status">
-                    <option value="">All Status</option>
-                    <option value="active" <?php echo $status_filter === 'active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="inactive" <?php echo $status_filter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-outline-primary me-2">
-                    <i class="fas fa-search me-1"></i>Search
-                </button>
-                <a href="patients.php" class="btn btn-outline-secondary">
-                    <i class="fas fa-times me-1"></i>Clear
-                </a>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
+            <div class="col-lg-4 d-flex align-items-end justify-content-end">
                 <div class="dropdown">
                     <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="fas fa-download me-1"></i>Export
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#" onclick="exportPatients('csv')">
                             <i class="fas fa-file-csv me-2"></i>Export as CSV
                         </a></li>
@@ -296,7 +384,7 @@ include '../includes/header.php';
                     </ul>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -362,7 +450,7 @@ include '../includes/header.php';
     <div class="card-header">
         <h5 class="mb-0">Patients List</h5>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="overflow: visible;">
         <?php if (empty($patients)): ?>
             <div class="text-center py-5">
                 <i class="fas fa-user-plus fa-4x text-muted mb-3"></i>
@@ -373,7 +461,7 @@ include '../includes/header.php';
                 </button>
             </div>
         <?php else: ?>
-            <div class="table-responsive">
+            <div class="table-responsive" style="overflow: visible;">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -438,30 +526,68 @@ include '../includes/header.php';
                                     <?php echo format_date($patient['registered_date']); ?>
                                 </td>
                                 <td>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
-                                            <i class="fas fa-ellipsis-v"></i>
+                                    <div class="d-flex gap-1">
+                                        <!-- View Details Button -->
+                                        <button class="btn btn-sm btn-outline-info" 
+                                                onclick="viewPatient(<?php echo $patient['id']; ?>)" 
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
                                         </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <a class="dropdown-item" href="#" onclick="viewPatient(<?php echo $patient['id']; ?>)">
-                                                    <i class="fas fa-eye me-2"></i>View Details
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="#" onclick="editPatient(<?php echo $patient['id']; ?>)">
-                                                    <i class="fas fa-edit me-2"></i>Edit
-                                                </a>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <a class="dropdown-item" href="?toggle_status=1&patient_id=<?php echo $patient['id']; ?>" 
-                                                   onclick="return confirm('Are you sure you want to change the status?')">
-                                                    <i class="fas fa-toggle-<?php echo $patient['user_status'] === 'active' ? 'off' : 'on'; ?> me-2"></i>
-                                                    <?php echo $patient['user_status'] === 'active' ? 'Deactivate' : 'Activate'; ?>
-                                                </a>
-                                            </li>
-                                        </ul>
+                                        
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-sm btn-outline-warning" 
+                                                onclick="editPatient(<?php echo $patient['id']; ?>)" 
+                                                title="Edit Patient">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        
+                                        <!-- Status Toggle Button -->
+                                        <button type="button" 
+                                                class="btn btn-sm <?php echo $patient['user_status'] === 'active' ? 'btn-outline-secondary' : 'btn-outline-success'; ?>" 
+                                                onclick="togglePatientStatus(<?php echo $patient['id']; ?>, '<?php echo $patient['user_status']; ?>', '<?php echo htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']); ?>')" 
+                                                title="<?php echo $patient['user_status'] === 'active' ? 'Deactivate' : 'Activate'; ?> Patient">
+                                            <i class="fas fa-toggle-<?php echo $patient['user_status'] === 'active' ? 'off' : 'on'; ?>"></i>
+                                        </button>
+                                        
+                                        <!-- Delete Button -->
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmDeletePatient(<?php echo $patient['id']; ?>, '<?php echo htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']); ?>')" 
+                                                title="Delete Patient">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        
+                                        <!-- More Actions Dropdown -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                    data-bs-toggle="dropdown" 
+                                                    title="More Actions">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><h6 class="dropdown-header">More Actions</h6></li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" onclick="viewMedicalHistory(<?php echo $patient['id']; ?>)">
+                                                        <i class="fas fa-file-medical-alt me-2"></i>Medical History
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" onclick="viewAppointments(<?php echo $patient['id']; ?>)">
+                                                        <i class="fas fa-calendar-alt me-2"></i>Appointments
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" onclick="viewBilling(<?php echo $patient['id']; ?>)">
+                                                        <i class="fas fa-file-invoice-dollar me-2"></i>Billing History
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" onclick="generatePatientReport(<?php echo $patient['id']; ?>)">
+                                                        <i class="fas fa-file-pdf me-2"></i>Generate Report
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -676,6 +802,122 @@ include '../includes/header.php';
     </div>
 </div>
 
+<!-- Delete Patient Confirmation Modal -->
+<div class="modal fade" id="deletePatientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h5>Are you sure you want to delete this patient?</h5>
+                    <p class="text-muted mb-3">
+                        Patient: <strong id="deletePatientName"></strong>
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Important:</strong> If this patient has medical records, appointments, or prescriptions, 
+                        the account will be deactivated instead of deleted to preserve medical history.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <form method="POST" class="d-inline">
+                    <input type="hidden" id="deletePatientId" name="patient_id">
+                    <button type="submit" name="delete_patient" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Confirm Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Action buttons styling */
+.btn-group-actions {
+    white-space: nowrap;
+}
+
+.btn-group-actions .btn {
+    border-radius: 0.25rem;
+    margin-right: 0.25rem;
+}
+
+.btn-group-actions .btn:last-child {
+    margin-right: 0;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.status-active {
+    background-color: #d1edff;
+    color: #0969da;
+}
+
+.status-badge.status-inactive {
+    background-color: #fff1c2;
+    color: #7d4e00;
+}
+
+/* Table improvements */
+.table td {
+    vertical-align: middle;
+}
+
+/* Action column width */
+.table th:last-child,
+.table td:last-child {
+    width: 220px;
+    min-width: 220px;
+}
+
+/* Button spacing in action column */
+.d-flex.gap-1 {
+    gap: 0.25rem !important;
+}
+
+/* Dropdown menu improvements */
+.dropdown-menu {
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.dropdown-header {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Fix dropdown positioning in tables */
+.table-responsive {
+    overflow: visible !important;
+}
+
+.table .dropdown {
+    position: static !important;
+}
+
+.table .dropdown-menu {
+    position: absolute !important;
+    z-index: 1050 !important;
+    transform: translateX(-85%) !important;
+}
+</style>
+
 <script>
 // View patient details
 function viewPatient(patientId) {
@@ -705,6 +947,61 @@ function editPatient(patientId) {
         });
 }
 
+// Confirm delete patient
+function confirmDeletePatient(patientId, patientName) {
+    document.getElementById('deletePatientId').value = patientId;
+    document.getElementById('deletePatientName').textContent = patientName;
+    new bootstrap.Modal(document.getElementById('deletePatientModal')).show();
+}
+
+// View medical history
+function viewMedicalHistory(patientId) {
+    window.open(`../pages/doctor_patient_history.php?patient_id=${patientId}`, '_blank');
+}
+
+// View appointments
+function viewAppointments(patientId) {
+    window.open(`appointments.php?patient_filter=${patientId}`, '_blank');
+}
+
+// View billing
+function viewBilling(patientId) {
+    window.open(`billing.php?patient_filter=${patientId}`, '_blank');
+}
+
+// Generate patient report
+function generatePatientReport(patientId) {
+    window.open(`patient_report.php?id=${patientId}&format=pdf`, '_blank');
+}
+
+// Toggle patient status
+function togglePatientStatus(patientId, currentStatus, patientName) {
+    const newStatus = currentStatus === 'active' ? 'deactivate' : 'activate';
+    const action = currentStatus === 'active' ? 'deactivation' : 'activation';
+    
+    if (confirm(`Are you sure you want to ${newStatus} ${patientName}?`)) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
+        
+        const patientIdInput = document.createElement('input');
+        patientIdInput.type = 'hidden';
+        patientIdInput.name = 'patient_id';
+        patientIdInput.value = patientId;
+        
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'hidden';
+        toggleInput.name = 'toggle_patient_status';
+        toggleInput.value = '1';
+        
+        form.appendChild(patientIdInput);
+        form.appendChild(toggleInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Export patients
 function exportPatients(format = 'csv') {
     const search = document.getElementById('search').value;
@@ -724,6 +1021,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     dobInputs.forEach(input => {
         input.max = today;
+    });
+
+    // Fix dropdown positioning in table
+    const dropdownToggles = document.querySelectorAll('.table .dropdown-toggle');
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const dropdown = this.closest('.dropdown');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            
+            if (menu) {
+                // Reset positioning
+                menu.style.position = 'absolute';
+                menu.style.zIndex = '1050';
+                
+                // Get table and row position
+                const table = this.closest('.table-responsive');
+                const row = this.closest('tr');
+                const rect = row.getBoundingClientRect();
+                const tableRect = table.getBoundingClientRect();
+                
+                // Check if we're in the first few rows
+                const rowIndex = Array.from(row.parentElement.children).indexOf(row);
+                
+                // Position dropdown appropriately
+                if (rowIndex <= 2) { // First few rows
+                    menu.style.top = '100%';
+                } else {
+                    menu.style.bottom = '100%';
+                    menu.style.top = 'auto';
+                }
+                
+                // Ensure dropdown doesn't go off screen horizontally
+                menu.style.right = '0';
+                menu.style.left = 'auto';
+            }
+        });
     });
 });
 </script>

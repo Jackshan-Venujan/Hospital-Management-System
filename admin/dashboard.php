@@ -116,7 +116,7 @@ include '../includes/header.php';
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <h5 class="card-title mb-1">Monthly Revenue</h5>
-                        <h2 class="text-success mb-0">$<?php echo number_format($monthly_revenue, 2); ?></h2>
+                        <h2 class="text-success mb-0">Rs. <?php echo number_format($monthly_revenue, 2); ?></h2>
                         <small class="text-muted">Total revenue for <?php echo date('F Y'); ?></small>
                     </div>
                     <div class="col-md-4 text-end">
@@ -222,28 +222,40 @@ include '../includes/header.php';
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
                         <a href="patients.php?action=add" class="btn btn-outline-primary w-100">
                             <i class="fas fa-user-plus fa-2x mb-2 d-block"></i>
                             Add Patient
                         </a>
                     </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
                         <a href="doctors.php?action=add" class="btn btn-outline-success w-100">
                             <i class="fas fa-user-md fa-2x mb-2 d-block"></i>
                             Add Doctor
                         </a>
                     </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
                         <a href="appointments.php?action=add" class="btn btn-outline-info w-100">
                             <i class="fas fa-calendar-plus fa-2x mb-2 d-block"></i>
                             Schedule Appointment
                         </a>
                     </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
                         <a href="reports.php" class="btn btn-outline-warning w-100">
                             <i class="fas fa-chart-bar fa-2x mb-2 d-block"></i>
                             View Reports
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
+                        <a href="billing.php" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-file-invoice-dollar fa-2x mb-2 d-block"></i>
+                            Manage Billing
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
+                        <a href="settings.php" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-cogs fa-2x mb-2 d-block"></i>
+                            System Settings
                         </a>
                     </div>
                 </div>

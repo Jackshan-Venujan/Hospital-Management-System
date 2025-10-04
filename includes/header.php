@@ -61,9 +61,8 @@ if (!is_logged_in()) {
                             ['icon' => 'fas fa-tachometer-alt', 'text' => 'Dashboard', 'url' => 'doctor_dashboard.php'],
                             ['icon' => 'fas fa-calendar-check', 'text' => 'My Appointments', 'url' => 'doctor_appointments.php'],
                             ['icon' => 'fas fa-users', 'text' => 'My Patients', 'url' => 'doctor_patients.php'],
-                            ['icon' => 'fas fa-notes-medical', 'text' => 'Medical Records', 'url' => 'medical_records.php'],
-                            ['icon' => 'fas fa-prescription-bottle', 'text' => 'Prescriptions', 'url' => 'prescriptions.php'],
-                            ['icon' => 'fas fa-clock', 'text' => 'Schedule', 'url' => 'doctor_schedule.php'],
+                            ['icon' => 'fas fa-file-medical-alt', 'text' => 'Medical Records', 'url' => 'doctor_medical_records.php'],
+                            ['icon' => 'fas fa-prescription-bottle-alt', 'text' => 'Prescriptions', 'url' => 'doctor_prescriptions.php'],
                             ['icon' => 'fas fa-user-circle', 'text' => 'Profile', 'url' => 'doctor_profile.php']
                         ];
                         break;

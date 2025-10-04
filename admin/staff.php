@@ -504,7 +504,7 @@ while ($dept = mysqli_fetch_assoc($departments_result)) {
                                         <?php if (!empty($staff['salary'])): ?>
                                             <span class="fw-bold text-success">
                                                 <i class="fas fa-dollar-sign me-1"></i>
-                                                <?php echo number_format($staff['salary'], 2); ?>
+                                                Rs. <?php echo number_format($staff['salary'], 2); ?>
                                             </span>
                                         <?php else: ?>
                                             <span class="text-muted">Not specified</span>
@@ -918,7 +918,7 @@ function viewStaff(staff) {
                     </div>
                     <div class="col-sm-6">
                         <p><strong>Hire Date:</strong><br>${staff.hire_date ? new Date(staff.hire_date).toLocaleDateString() : 'Not specified'}</p>
-                        <p><strong>Salary:</strong><br>${staff.salary ? '$' + parseFloat(staff.salary).toLocaleString() : 'Not specified'}</p>
+                        <p><strong>Salary:</strong><br>${staff.salary ? 'Rs. ' + parseFloat(staff.salary).toLocaleString() : 'Not specified'}</p>
                         <p><strong>Staff ID:</strong><br>${staff.id}</p>
                     </div>
                 </div>

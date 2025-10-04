@@ -536,8 +536,8 @@ try {
                             </td>
                             <td><?php echo htmlspecialchars($item['description']); ?></td>
                             <td class="text-center"><?php echo number_format($item['quantity'], 2); ?></td>
-                            <td class="text-right">$<?php echo number_format($item['unit_price'], 2); ?></td>
-                            <td class="text-right"><strong>$<?php echo number_format($item['total_price'], 2); ?></strong></td>
+                            <td class="text-right">Rs. <?php echo number_format($item['unit_price'], 2); ?></td>
+                            <td class="text-right"><strong>Rs. <?php echo number_format($item['total_price'], 2); ?></strong></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -550,21 +550,21 @@ try {
                     <table>
                         <tr>
                             <td>Subtotal:</td>
-                            <td class="text-right">$<?php echo number_format($invoice['subtotal'], 2); ?></td>
+                            <td class="text-right">Rs. <?php echo number_format($invoice['subtotal'], 2); ?></td>
                         </tr>
                         <?php if ($invoice['discount_amount'] > 0): ?>
                         <tr>
                             <td>Discount:</td>
-                            <td class="text-right">-$<?php echo number_format($invoice['discount_amount'], 2); ?></td>
+                            <td class="text-right">-Rs. <?php echo number_format($invoice['discount_amount'], 2); ?></td>
                         </tr>
                         <?php endif; ?>
                         <tr>
                             <td>Tax (<?php echo $invoice['tax_rate']; ?>%):</td>
-                            <td class="text-right">$<?php echo number_format($invoice['tax_amount'], 2); ?></td>
+                            <td class="text-right">Rs. <?php echo number_format($invoice['tax_amount'], 2); ?></td>
                         </tr>
                         <tr class="total-row">
                             <td><strong>Total Amount:</strong></td>
-                            <td class="text-right"><strong>$<?php echo number_format($invoice['total_amount'], 2); ?></strong></td>
+                            <td class="text-right"><strong>Rs. <?php echo number_format($invoice['total_amount'], 2); ?></strong></td>
                         </tr>
                     </table>
                 </div>
@@ -576,9 +576,9 @@ try {
                 <div class="section-title">Payment History</div>
                 <div class="payment-summary">
                     <strong>Payment Summary:</strong><br>
-                    Total Amount: <strong>$<?php echo number_format($invoice['total_amount'], 2); ?></strong> | 
-                    Paid Amount: <strong>$<?php echo number_format($invoice['paid_amount'], 2); ?></strong> | 
-                    Balance Due: <strong>$<?php echo number_format($invoice['balance_amount'], 2); ?></strong>
+                    Total Amount: <strong>Rs. <?php echo number_format($invoice['total_amount'], 2); ?></strong> | 
+                    Paid Amount: <strong>Rs. <?php echo number_format($invoice['paid_amount'], 2); ?></strong> | 
+                    Balance Due: <strong>Rs. <?php echo number_format($invoice['balance_amount'], 2); ?></strong>
                 </div>
                 
                 <table class="items-table">
@@ -597,7 +597,7 @@ try {
                             <td><?php echo htmlspecialchars($payment['payment_number']); ?></td>
                             <td><?php echo date('M j, Y', strtotime($payment['payment_date'])); ?></td>
                             <td><?php echo ucfirst(str_replace('_', ' ', $payment['payment_method'])); ?></td>
-                            <td class="text-right"><strong>$<?php echo number_format($payment['amount'], 2); ?></strong></td>
+                            <td class="text-right"><strong>Rs. <?php echo number_format($payment['amount'], 2); ?></strong></td>
                             <td><?php echo htmlspecialchars($payment['reference_number'] ?? '-'); ?></td>
                         </tr>
                         <?php endforeach; ?>
